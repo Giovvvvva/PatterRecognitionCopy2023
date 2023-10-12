@@ -45,7 +45,6 @@ class KNNClassifier:
         for i, x in enumerate(X_test):
             pred_label = self.predict_single_data(x)
             predictions[i] = pred_label
-        print(np.array(predictions))
         # Complete your code here
 
         return np.array(predictions)
@@ -85,10 +84,11 @@ class KNNClassifier:
         Hint: You should be able to use the predict function get
         the predicted labels for the test data and then compute the accuracy
         """
-
+        prediction = self.predict(X_test)
+        count_correct_pred = np.sum(prediction == y_test)
         # Complete your code here
 
-        return 
+        return count_correct_pred/(len(y_test))
 
 if __name__ == '__main__':
   

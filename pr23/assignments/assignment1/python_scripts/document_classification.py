@@ -28,10 +28,6 @@ class DocumentPreprocessing:
         '''    
         Extract the data from the csv file and return the data as a pandas dataframe
         '''
-    
-        # Load the data from the csv file
-        #  Extract the classes present in the domain column
-        # Complete your code here
         return pd.read_csv(self.path)
 
     def extract_labels_and_text(self,data : pd.DataFrame()):
@@ -41,7 +37,8 @@ class DocumentPreprocessing:
         The outputs are the list of classes and the list of text data
         '''
         # Complete your code here
-
+        domain = list(self.data['Domain'])
+        abstract = list(self.data['Abstract'])
 
         return (domain, abstract)
     
@@ -53,8 +50,10 @@ class DocumentPreprocessing:
         then self.class_labels = ['ab', 'aab', 'cds']
         '''
         # Complete your code here
-
-        self.class_labels = [] # Change this line to the correct code
+        
+        self.class_labels = list(np.unique(self.domain))
+        #print(self.class_labels)
+        
 
     def preprocess_labels(self, y_train : list()) -> list():
         '''
@@ -64,7 +63,15 @@ class DocumentPreprocessing:
         then the out put is  [0, 2, 1, 1, 0, 2]
         '''
         # Complete your code here
-        return  
+        # our set is generate_labels(self)
+        # we want to get the index of the labels according to the set
+        listReturn = []
+        for x in y_train:
+            for y in range(len(self.class_labels)):
+                if (self.class_labels[y] == x):
+                    listReturn.append(y)
+        return listReturn
+
 
     def remove_special_characters(self,word):
         '''
@@ -84,7 +91,22 @@ class DocumentPreprocessing:
         return the preprocessed text as a list of words
         '''
         # Complete your code here
-
+        words = []
+        #step1
+        textrem = self.remove_special_characters(text)
+        #step2
+        textList = textrem.split()
+        for i in textList:
+            if (len(i) > 1):
+                words.append(i)#changed this to check
+        #step3
+        low = []
+        for n in words:
+            n = str.lower(n)#iterates through the new words list and lowers it
+            low.append(n)
+        #words = textList
+        words = low
+        #print(words)
         return words
     
     def bag_words(self):
@@ -94,14 +116,18 @@ class DocumentPreprocessing:
         will break the task into smaller parts below to make it easier to
         understand the process
         '''
-      
-        
         vocabulory = []
         # Get the unique words in the dataset and sort them in alphabetical order
         # Complete your code here
-
-
-
+        
+        #preprocessing
+        for unproc in self.abstract:
+            preprocs = self.preprocess(unproc)
+            uniqueset = np.unique(preprocs)
+            for x in uniqueset:
+                if x not in vocabulory:
+                    vocabulory.append(x)
+        vocabulory.sort()
         self.vocabulory = vocabulory
 
         # Conver the text to a bag of words model
@@ -110,20 +136,31 @@ class DocumentPreprocessing:
 
         # Complete your code here
         # Hint: use the preprocess function to preprocess the text data
-
+        position = 0
+        for unproc in self.abstract:
+            preprocs = self.preprocess(unproc)
+            for x in preprocs:
+                for i in range(len(self.vocabulory)):
+                    if x == self.vocabulory[i]:
+                        X_train[position, i] += 1
+            position = position + 1
+            
 
         self.X_train = X_train
 
-    def transform(self,text: list() ) -> np.array:
+    def transform(self, text: list) -> np.array:
         '''
         The function takes a list of text data and outputs the 
         feature matrix for the text data.
-        Examples if the text is ['this is a test', 'this is another test']
-        The output is a numpy array of shape (2, len(self.vocabulory))
         '''
-        
-        # Complete your code here
+        text_matrix = np.zeros((len(text), len(self.vocabulory)))
 
+        for i, x in enumerate(text):
+            preproc = self.preprocess(x)
+            for word in preproc:
+                if word in self.vocabulory:
+                    j = self.vocabulory.index(word) 
+                    text_matrix[i, j] += 1
 
         return text_matrix
 
